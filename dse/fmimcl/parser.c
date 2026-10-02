@@ -88,12 +88,16 @@ static MarshalType _decode_var_type(const char* t)
 }
 
 
-static MarshalVar _decode_var_variability(const char* t, MarshalDir dir)
+static MarshalVar _decode_var_variability(const char* t, const char* causality)
 {
     /* Apply FMI 2 defaults when not specified. */
     if (t == NULL) {
-        if (dir == MARSHAL_DIRECTION_PARAMETER)
-            return MARSHAL_VARIABILITY_FIXED;
+        if (causality) {
+            if (strcmp(causality, "parameter") == 0 ||
+                strcmp(causality, "calculatedParameter") == 0) {
+                return MARSHAL_VARIABILITY_FIXED;
+            }
+        }
         return MARSHAL_VARIABILITY_CONTINUOUS;
     }
 
@@ -158,8 +162,7 @@ static void* _fmu_signal_generator(ModelInstanceSpec* mi, void* data)
         s->variable_kind = _decode_var_kind(v_type);
         s->variable_type = _decode_var_type(v_type);
         s->variable_dir = _decode_var_dir(v_dir);
-        s->variable_variability =
-            _decode_var_variability(v_variability, s->variable_dir);
+        s->variable_variability = _decode_var_variability(v_variability, v_dir);
 
         return s;
     }

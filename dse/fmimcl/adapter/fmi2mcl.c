@@ -241,9 +241,14 @@ static bool _is_start_value(MarshalGroup* mg, size_t k, FmuSignal* s)
     case MARSHAL_TYPE_DOUBLE:
     case MARSHAL_TYPE_INT32:
         return mg->source.scalar[idx] == strtod(v, NULL);
-    case MARSHAL_TYPE_BOOL:
-        return mg->source.scalar[idx] ==
-               ((strcmp(v, "true") == 0 || strtod(v, NULL) != 0) ? 1 : 0);
+    case MARSHAL_TYPE_BOOL: {
+        double start = fmimcl_parse_bool(v) ? 1.0 : 0.0;
+        if (mg->source.scalar[idx] == start) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     case MARSHAL_TYPE_STRING: {
         const char* src = mg->source.binary[idx];
         return src && strcmp(src, v) == 0;
